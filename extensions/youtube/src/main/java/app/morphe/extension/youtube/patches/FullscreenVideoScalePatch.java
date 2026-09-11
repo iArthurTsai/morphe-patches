@@ -237,6 +237,35 @@ public class FullscreenVideoScalePatch {
             return;
         }
 
+        if (mode == VideoScaleMode.SMART) {
+            final float stretchScaleX = displayW / contentW;
+            final float stretchScaleY = displayH / contentH;
+
+            float finalScaleX;
+            float finalScaleY;
+
+            final float blendFactor = 0.5f;
+
+            if (stretchScaleX > stretchScaleY) {
+                finalScaleX = stretchScaleX;
+                finalScaleY = stretchScaleY + (stretchScaleX - stretchScaleY) * blendFactor;
+            } else {
+                finalScaleY = stretchScaleY;
+                finalScaleX = stretchScaleX + (stretchScaleY - stretchScaleX) * blendFactor;
+            }
+            
+            view.setPivotX(contentLeft + contentW / 2f);
+            view.setPivotY(contentTop + contentH / 2f);
+            view.setScaleX(finalScaleX);
+            view.setScaleY(finalScaleY);
+
+            final float contentCenterX = loc[0] + contentLeft + contentW / 2f;
+            final float contentCenterY = loc[1] + contentTop + contentH / 2f;
+            view.setTranslationX(displayW / 2f - contentCenterX);
+            view.setTranslationY(displayH / 2f - contentCenterY);
+            return;
+        }
+
         view.setPivotX(contentLeft);
         view.setPivotY(contentTop);
         view.setScaleX(displayW / contentW);
