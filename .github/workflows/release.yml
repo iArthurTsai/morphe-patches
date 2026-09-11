@@ -37,8 +37,8 @@ jobs:
       - name: Publish Custom Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "Morphe Patches v1.0.0"
+          tag_name: v9.9.9
+          name: "Morphe Patches v9.9.9"
           body: "Custom build with 4-mode fullscreen video scale."
           files: |
             **/build/libs/*.mpp
