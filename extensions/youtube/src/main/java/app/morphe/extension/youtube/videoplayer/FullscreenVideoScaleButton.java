@@ -83,7 +83,8 @@ public class FullscreenVideoScaleButton {
             VideoScaleMode next = switch (current) {
                 case DEFAULT -> VideoScaleMode.STRETCH;
                 case STRETCH -> VideoScaleMode.ZOOM;
-                case ZOOM -> VideoScaleMode.DEFAULT;
+                case ZOOM -> VideoScaleMode.SMART;
+                case SMART -> VideoScaleMode.DEFAULT;
             };
             Settings.FULLSCREEN_VIDEO_SCALE.save(next);
             updateButtonIcon(next);
