@@ -343,7 +343,7 @@
         <item>@string/morphe_fullscreen_video_scale_entry_default</item>
         <item>@string/morphe_fullscreen_video_scale_entry_stretch</item>
         <item>@string/morphe_fullscreen_video_scale_entry_zoom</item>
-        <item>Smart</item>
+        <item>@string/morphe_fullscreen_video_scale_entry_smart</item>
     </string-array>
     <string-array name="morphe_fullscreen_video_scale_entry_values">
         <item>DEFAULT</item>
