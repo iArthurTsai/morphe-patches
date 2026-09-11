@@ -52,6 +52,7 @@ public class FullscreenVideoScalePatch {
         DEFAULT("morphe_fullscreen_video_scale_fit"),
         STRETCH("morphe_fullscreen_video_scale_stretch"),
         ZOOM("morphe_fullscreen_video_scale_zoom");
+        SMART("morphe_fullscreen_video_scale_smart");
 
         public final String iconBaseName;
 
