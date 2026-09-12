@@ -1,6 +1,7 @@
 package app.morphe.patches.youtube.layout.captions
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -66,19 +67,21 @@ internal val captionCookiesPatch = bytecodePatch(
                             invoke-static { }, $$EXTENSION_CLASS->getRequireCookies()Z
                             move-result v0
                             if-eqz v0, :disabled
-                            
-                            # Set Cookie.
-                            const-string v0, "Cookie"
-                            invoke-static { }, $$EXTENSION_CLASS->getCookies()Ljava/lang/String;
-                            move-result-object v1
-                            invoke-virtual { p1, v0, v1 }, Lorg/chromium/net/UrlRequest$Builder;->addHeader(Ljava/lang/String;Ljava/lang/String;)Lorg/chromium/net/UrlRequest$Builder;
 
-                            # Set User-Agent.
+                            # 偽裝成電腦版 Chrome User-Agent
                             const-string v0, "User-Agent"
                             invoke-static { }, $$EXTENSION_CLASS->getUserAgent()Ljava/lang/String;
                             move-result-object v1
+                            invoke-virtual { p1, v0, v1 }, Lorg/chromium/net/UrlRequest$Builder;->addHeader(Ljava/lang/String;Ljava/lang/String;)Lorg/chromium/net/UrlRequest$Builder;
 
-                            # Set Header.
+                            # 若有設定 Cookie 則掛上
+                            invoke-static { }, $$EXTENSION_CLASS->hasCookies()Z
+                            move-result v0
+                            if-eqz v0, :disabled
+
+                            const-string v0, "Cookie"
+                            invoke-static { }, $$EXTENSION_CLASS->getCookies()Ljava/lang/String;
+                            move-result-object v1
                             invoke-virtual { p1, v0, v1 }, Lorg/chromium/net/UrlRequest$Builder;->addHeader(Ljava/lang/String;Ljava/lang/String;)Lorg/chromium/net/UrlRequest$Builder;
 
                             :disabled
@@ -101,9 +104,13 @@ internal val captionCookiesPatch = bytecodePatch(
                     "invoke-direct { p0, v$buildRegister }, $helperMethod"
                 )
 
-                addInstruction(
+                // 在 newUrlRequestBuilder 前攔截 urlRegister，直接改寫為帶有 &tlang=zh-Hant 的網址
+                addInstructions(
                     urlIndex,
-                    "invoke-static { v$urlRegister }, $EXTENSION_CLASS->setRequireCookies(Ljava/lang/String;)V"
+                    """
+                        invoke-static { v$urlRegister }, $EXTENSION_CLASS->modifyTimedTextUrl(Ljava/lang/String;)Ljava/lang/String;
+                        move-result-object v$urlRegister
+                    """
                 )
             }
         }
