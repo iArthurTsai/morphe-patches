@@ -2,47 +2,56 @@ name: Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  build-and-release:
-    name: Build and Release
-    runs-on: ubuntu-latest
+  release:
+    name: Release
     permissions:
       contents: write
       packages: read
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v5
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Cache Gradle
+        uses: burrunan/gradle-cache-action@v3
 
-      - name: Build Patches (.mpp & .jar)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Android Patches (.mpp with DEX)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           chmod +x gradlew
-          ./gradlew build --no-daemon \
+          ./gradlew :patches:buildAndroid :patches:generatePatchesList --no-daemon \
             -Pgpr.user="${{ github.actor }}" \
             -Pgpr.key="${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Publish Custom Release
+      - name: Publish Release to GitHub
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "Morphe Patches v1.0.0"
-          body: "Custom build with 4-mode fullscreen video scale."
+          tag_name: v1.42.2
+          name: "Morphe Patches v1.42.2"
+          body: "Release with Android DEX and Smart video scale mode."
           files: |
-            **/build/libs/*.mpp
-            **/build/libs/*.jar
+            patches/build/libs/patches-*.mpp
           draft: false
           prerelease: false
         env:
