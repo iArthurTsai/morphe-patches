@@ -52,7 +52,8 @@ public class FullscreenVideoScalePatch {
     public enum VideoScaleMode {
         DEFAULT("morphe_fullscreen_video_scale_fit"),
         STRETCH("morphe_fullscreen_video_scale_stretch"),
-        ZOOM("morphe_fullscreen_video_scale_zoom");
+        ZOOM("morphe_fullscreen_video_scale_zoom"),
+        SMART("morphe_fullscreen_video_scale_zoom");
 
         public final String iconBaseName;
 
@@ -237,6 +238,33 @@ public class FullscreenVideoScalePatch {
             view.setPivotY(contentTop + contentH / 2f);
             view.setScaleX(scale);
             view.setScaleY(scale);
+            final float contentCenterX = loc[0] + contentLeft + contentW / 2f;
+            final float contentCenterY = loc[1] + contentTop + contentH / 2f;
+            view.setTranslationX(displayW / 2f - contentCenterX);
+            view.setTranslationY(displayH / 2f - contentCenterY);
+            return;
+        }
+
+        if (mode == VideoScaleMode.SMART) {
+            // 計算全拉伸比例 (Stretch)
+            final float stretchX = displayW / contentW;
+            final float stretchY = displayH / contentH;
+            
+            // 計算等比填滿比例 (Zoom)
+            final float uniformZoom = Math.max(stretchX, stretchY);
+
+            // 智能混合係數 (0.5f 代表各取一半平衡點，既減少裁切又抑制變形)
+            final float blendFactor = 0.5f;
+
+            // 將 Stretch 與 Zoom 取線性插值，並乘上當前捏合手勢比例 (pinch)
+            final float finalScaleX = (stretchX + (uniformZoom - stretchX) * blendFactor) * pinch;
+            final float finalScaleY = (stretchY + (uniformZoom - stretchY) * blendFactor) * pinch;
+
+            view.setPivotX(contentLeft + contentW / 2f);
+            view.setPivotY(contentTop + contentH / 2f);
+            view.setScaleX(finalScaleX);
+            view.setScaleY(finalScaleY);
+
             final float contentCenterX = loc[0] + contentLeft + contentW / 2f;
             final float contentCenterY = loc[1] + contentTop + contentH / 2f;
             view.setTranslationX(displayW / 2f - contentCenterX);
