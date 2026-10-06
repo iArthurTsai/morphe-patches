@@ -61,6 +61,8 @@ jobs:
           body: "Auto build with Traditional Chinese captions and Smart video scale mode."
           files: |
             patches/build/libs/patches-*.mpp
+            patches/build/libs/patches.json
+            patches/build/resources/main/patches.json
           draft: false
           prerelease: false
         env:
