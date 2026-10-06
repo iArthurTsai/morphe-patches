@@ -44,12 +44,21 @@ jobs:
             -Pgpr.user="${{ github.actor }}" \
             -Pgpr.key="${{ secrets.GITHUB_TOKEN }}"
 
+      # 自動從產生的 .mpp 檔名中擷取版本號（例如 1.46.0）
+      - name: Get Version
+        id: get_version
+        run: |
+          FILE=$(find patches/build/libs -name "patches-*.mpp" ! -name "*-javadoc.mpp" ! -name "*-sources.mpp" | head -n 1)
+          VERSION=$(basename "$FILE" | sed -E 's/patches-(.+)\.mpp/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # 發布時動態使用抓到的版本號
       - name: Publish Release to GitHub
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "Morphe Patches v1.0.${{ github.run_number }}"
-          body: "Auto build with Smart video scale mode."
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: "Morphe Patches v${{ steps.get_version.outputs.version }}"
+          body: "Auto build with Traditional Chinese captions and Smart video scale mode."
           files: |
             patches/build/libs/patches-*.mpp
           draft: false
